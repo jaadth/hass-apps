@@ -1,0 +1,14 @@
+configuration:
+  airplay_name:
+    name: AirPlay Device Name
+    description: The name that appears when choosing an AirPlay target on your Apple device. Default is Home Assistant.
+  ledfx_port:
+    name: LedFx Web UI Port
+    description: Port to access the LedFx interface. Default is 8888.
+  network_interface:
+    name: Network Interface
+    description: Network Interface to access the LedFx Web UI. Default is enu1, which works for HA running on Raspberry Pi 5.
+  verbose:
+    name: Verbose
+    description: Enable Verbose Logging. Default is False.
+

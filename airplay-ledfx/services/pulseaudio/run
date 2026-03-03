@@ -1,0 +1,18 @@
+#!/command/with-contenv bashio
+bashio::log.info "PA: Begin PulseAudio..."
+
+rm -f /run/pulse/native
+mkdir -p /run/pulse
+
+# Create cookie files at runtime (not in Docker layer) so PulseAudio
+# can write them
+mkdir -p /tmp/pulse
+export PULSE_COOKIE=/tmp/pulse/cookie
+export DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus-private/system_bus_socket"
+
+bashio::log.info "PA: Starting PulseAudio..."
+exec pulseaudio \
+	--daemonize=no \
+	--realtime=false \
+	--log-target=stderr \
+	--exit-idle-time=-1

@@ -1,0 +1,41 @@
+name: "LedFx + Airplay"
+version: "1.0.1"
+slug: "airplay-ledfx"
+description: >-
+  AirPlay receiver (Shairport-Sync) with LedFx audio visualisation in a
+  single container.
+url: "https://github.com/jaadth/hass-apps"
+arch:
+  - amd64
+  - aarch64
+  - armhf
+  - armv7
+startup: application
+boot: auto
+init: false
+map:
+  - type: config
+    read_only: false
+devices:
+  - /dev/snd
+host_network: true
+ingress: true
+# For the side panel
+ingress_port: 9999
+ingress_stream: true
+panel_icon: mdi:led-strip-variant
+panel_title: LedFx
+ports:
+  8888/tcp: 8888
+ports_description:
+  8888/tcp: LedFx Web UI
+options:
+  airplay_name: "Home Assistant"
+  ledfx_port: 8888
+  network_interface: enu1
+  verbose: false
+schema:
+  airplay_name: str
+  ledfx_port: int
+  network_interface: str
+  verbose: bool

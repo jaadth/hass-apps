@@ -1,0 +1,41 @@
+#!/command/with-contenv bashio
+bashio::log.info "AV: Begin nginx..."
+
+LEDFX_PORT=$(bashio::config 'ledfx_port')
+INGRESS_ENTRY=$(bashio::addon.ingress_entry)
+INGRESS_PORT=$(bashio::addon.ingress_port)
+
+bashio::log.info "NX: Ingress entry: ${INGRESS_ENTRY}"
+bashio::log.info "NX: Ingress port: ${INGRESS_PORT}"
+
+# Write nginx config with the actual ingress path
+cat > /etc/nginx/http.d/ledfx.conf <<EOF
+server {
+    listen ${INGRESS_PORT};
+
+    location ${INGRESS_ENTRY}/ {
+        proxy_pass http://127.0.0.1:${LEDFX_PORT}/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        # Rewrite absolute paths in responses
+        sub_filter_once off;
+        sub_filter_types *;
+        sub_filter 'href="/' 'href="${INGRESS_ENTRY}/';
+        sub_filter 'src="/' 'src="${INGRESS_ENTRY}/';
+        sub_filter 'url(/' 'url(${INGRESS_ENTRY}/';
+    }
+
+    location / {
+        return 301 ${INGRESS_ENTRY}/;
+    }
+}
+EOF
+
+bashio::log.info "NX: Starting nginx..."
+exec nginx -g "daemon off;"

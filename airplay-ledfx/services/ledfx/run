@@ -1,0 +1,44 @@
+#!/command/with-contenv bashio
+bashio::log.info "FX: Begin LedFX..."
+
+LEDFX_PORT=$(bashio::config 'ledfx_port')
+VERBOSE=$(bashio::config 'verbose')
+
+export PULSE_SERVER="unix:/run/pulse/native"
+export PYTHONPATH="/opt/ledfx-venv/lib/python3.$(python3 -c 'import sys; print(sys.version_info.minor)')/site-packages"
+export PYTHONWARNINGS="ignore"
+
+until [ -S /run/pulse/native ]; do
+	bashio::log.info "FX: Waiting for PulseAudio..."
+	sleep 1
+done
+
+# Give PulseAudio a moment to fully load the null sink
+sleep 2
+
+if bashio::config.true 'verbose'; then
+	bashio::log.info "FX: === PulseAudio sinks available ==="
+	pactl -s unix:/run/pulse/native list sinks short 2>&1 | while read line; do
+		bashio::log.info "FX: $line"
+	done
+
+	bashio::log.info "FX: === Network interfaces ==="
+	ip addr show 2>&1 | while read line; do bashio::log.info "FX: $line"; done
+
+	bashio::log.info "FX: === Checking port after startup ==="
+	sleep 5
+	ss -tlnp 2>&1 | grep 8888 | while read line; do bashio::log.info "FX: $line"; done
+
+	bashio::log.info "FX: Python: $(/opt/ledfx-venv/bin/python3 --version 2>&1)"
+	bashio::log.info "FX: LedFx: $(/opt/ledfx-venv/bin/ledfx --version 2>&1)"
+fi
+
+# Run without exec so we capture the exit code and output
+bashio::log.info "FX: Starting LedFx..."
+/opt/ledfx-venv/bin/ledfx \
+	--config /config/ledfx-config \
+	--host 0.0.0.0 \
+	--port "${LEDFX_PORT}" \
+	2>&1 | while read line; do bashio::log.info "FX: $line"; done
+
+bashio::log.error "FX: LedFx exited with code $?"

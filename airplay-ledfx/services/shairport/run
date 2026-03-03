@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+bashio::log.info "SP: Begin shairport-sync..."
+
+IFACE=$(bashio::config 'network_interface')
+AIRPLAY_NAME=$(bashio::config 'airplay_name')
+
+export PULSE_SERVER="unix:/run/pulse/native"
+export DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus-private/system_bus_socket"
+
+until [ -S /run/pulse/native ]; do
+	bashio::log.info "SP: Waiting for PulseAudio..."
+	sleep 1
+done
+
+until [ -S /run/dbus-private/system_bus_socket ]; do
+	bashio::log.info "SP: Waiting for D-Bus..."
+	sleep 1
+done
+
+# Patch interface into shairport config at runtime
+sed -i "s/interface = \"enu1\"/interface = \"${IFACE}\"/" /etc/shairport-sync.conf
+sed -i "s/name = \"Home Assistant\"/name = \"${AIRPLAY_NAME}\"/" /etc/shairport-sync.conf
+
+bashio::log.info "SP: Starting shairport-sync on interface ${IFACE} as '${AIRPLAY_NAME}'..."
+exec shairport-sync --configfile=/etc/shairport-sync.conf -o pa

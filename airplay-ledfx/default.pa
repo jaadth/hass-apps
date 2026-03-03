@@ -1,0 +1,4 @@
+#!/usr/bin/pulseaudio -nF
+load-module module-null-sink sink_name=ledfx_sink sink_properties=device.description=LedFxSink
+load-module module-native-protocol-unix auth-anonymous=1 socket=/run/pulse/native
+load-module module-always-sink
