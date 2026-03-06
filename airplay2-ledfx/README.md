@@ -1,13 +1,13 @@
-# Airplay LedFX
+# Airplay2 LedFX
 
-Home Assistant App that provides Airplay as an audio input for a LedFX Server.
+Home Assistant App that provides Airplay 2 as an audio input for a LedFX Server.
 
 ## Features
 
 **Features:**
 - Single container
 - Multi-architecture support
-- Airplay support
+- Airplay 2 support
 - Configurable LedFX port
 
 ## Configuration Options
@@ -36,6 +36,9 @@ I had a hard time finding info on this so here's what I did.
 8. In HA **Settings/Device & Services/MQTT** you should find a **LedFX** device.
 
 ## Notes
+
+This app can take a while to install as it is compiling shairport-sync and
+NQPTP for AirPlay 2 support.
 
 Multiple instances of AirPlay shairport-sync cannot be hosted on the same
 system — AirPlay clients are confused by multiple AirPlay players at the

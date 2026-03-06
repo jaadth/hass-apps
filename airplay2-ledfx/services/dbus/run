@@ -1,0 +1,29 @@
+#!/command/with-contenv bashio
+bashio::log.info "DB: Begin D-Bus..."
+
+mkdir -p /run/dbus-private
+[ -f /etc/machine-id ] || dbus-uuidgen > /etc/machine-id
+
+# Remove stale socket only from our private path
+rm -f /run/dbus-private/system_bus_socket
+
+bashio::log.info "DB: Starting D-Bus..."
+if bashio::config.true 'verbose'; then
+	dbus-daemon \
+	    --system \
+	    --nofork \
+	    --nopidfile \
+	    --nosyslog \
+	    --address="unix:path=/run/dbus-private/system_bus_socket" \
+	    --print-address \
+		2>&1 | while read line; do bashio::log.info "DB: $line"; done
+else
+	exec dbus-daemon \
+	    --system \
+	    --nofork \
+	    --nopidfile \
+	    --nosyslog \
+	    --address="unix:path=/run/dbus-private/system_bus_socket" \
+	    --print-address
+fi
+

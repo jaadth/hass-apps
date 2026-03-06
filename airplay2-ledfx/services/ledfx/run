@@ -25,10 +25,6 @@ if bashio::config.true 'verbose'; then
 	bashio::log.info "FX: === Network interfaces ==="
 	ip addr show 2>&1 | grep -i "mtu\|inet" | while read line; do bashio::log.info "FX: $line"; done
 
-	bashio::log.info "FX: === Checking port after startup ==="
-	sleep 5
-	ss -tlnp 2>&1 | grep 8888 | while read line; do bashio::log.info "FX: $line"; done
-
 	bashio::log.info "FX: Python: $(/opt/ledfx-venv/bin/python3 --version 2>&1)"
 	bashio::log.info "FX: LedFx: $(/opt/ledfx-venv/bin/ledfx --version 2>&1)"
 fi

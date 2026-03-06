@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+bashio::log.info "NQ: Begin NQPTP..."
+
+# Allow real-time scheduling
+ulimit -r unlimited 2>/dev/null || true
+
+# Run with -v to get version and error output
+# nqptp -v 2>&1 | while read line; do bashio::log.info "NQ: $line"; done
+# bashio::log.error "NQ: NQPTP exited — check capabilities above"
+
+bashio::log.info "NQ: Starting NQPTP..."
+if bashio::config.true 'verbose'; then
+	bashio::log.info "NQ: NQPTP location: $(which nqptp 2>&1)"
+	bashio::log.info "NQ: NQPTP capabilities: $(getcap $(which nqptp) 2>&1)"
+
+	bashio::log.info "NQ: Running as: $(id)"
+	bashio::log.info "NQ: Shared memory check: $(ls -la /dev/shm/ 2>&1)"
+	bashio::log.info "NQ: netstat ports 319/320:"
+	netstat -ulnp 2>&1 | grep -E "319|320" | while read line; do bashio::log.info "NQ: $line"; done
+
+	nqptp 2>&1 | while read line; do bashio::log.info "NQ: $line"; done
+	bashio::log.error "NQ: NQPTP exited!"
+else
+	exec nqptp
+fi

@@ -13,11 +13,17 @@ Add this repository to Home Assistant:
 
 ## Apps
 
-### Airplay LedFX
+### AirPlay LedFX
 
 LedFX Server with Airplay support via shairport-sync
 
 [Documentation →](./airplay-ledfx/README.md)
+
+### AirPlay2 LedFX
+
+LedFX Server with AirPlay 2 support via shairport-sync
+
+[Documentation →](./airplay2-ledfx/README.md)
 
 ## Support
 

@@ -1,0 +1,25 @@
+#!/command/with-contenv bashio
+bashio::log.info "AV: Begin Avahi..."
+
+IFACE=$(bashio::config 'network_interface')
+export DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus-private/system_bus_socket"
+
+sed -i "s/allow-interfaces=.*/allow-interfaces=${IFACE}/" /etc/avahi/avahi-daemon.conf
+sed -i "s/use-ipv6=.*/use-ipv6=no/" /etc/avahi/avahi-daemon.conf
+
+until [ -S /run/dbus-private/system_bus_socket ]; do
+	bashio::log.info "AV: Waiting for D-Bus..."
+	sleep 1
+done
+
+bashio::log.info "AV: Version: $(avahi-daemon --version 2>&1)"
+
+bashio::log.info "AV: Starting Avahi..."
+if bashio::config.true 'verbose'; then
+#	avahi-daemon --no-drop-root --no-chroot --no-rlimits --debug \
+	avahi-daemon --no-drop-root --no-chroot --no-rlimits \
+		2>&1 | while read line; do bashio::log.info "AV: $line"; done
+else
+	exec avahi-daemon --no-drop-root --no-chroot --no-rlimits
+fi
+

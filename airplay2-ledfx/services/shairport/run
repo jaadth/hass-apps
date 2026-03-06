@@ -21,13 +21,20 @@ done
 sed -i "s/interface = \"enu1\"/interface = \"${IFACE}\"/" /etc/shairport-sync.conf
 sed -i "s/name = \"Home Assistant\"/name = \"${AIRPLAY_NAME}\"/" /etc/shairport-sync.conf
 
-bashio::log.info "SP: Version: $(shairport-sync --version 2>&1)"
 bashio::log.info "SP: Starting shairport-sync on interface ${IFACE} as '${AIRPLAY_NAME}'..."
-
 if bashio::config.true 'verbose'; then
-	shairport-sync --configfile=/etc/shairport-sync.conf -o pa --verbose \
+	bashio::log.info "SP: Version: $(shairport-sync --version 2>&1)" 
+	bashio::log.info "SP: PULSE_SERVER: ${PULSE_SERVER}"
+	bashio::log.info "SP: Pulse socket exists: $([ -S /run/pulse/native ] && echo YES || echo NO)"
+	bashio::log.info "SP: pactl test:"
+	pactl -s unix:/run/pulse/native info 2>&1 | head -5 | while read line; do bashio::log.info "SP: $line"; done
+
+	bashio::log.info "SP: shairport-sync backends:"
+	shairport-sync -h 2>&1 | grep -i "backend\|audio\|\-o" | while read line; do bashio::log.info "SP: $line"; done
+
+#	shairport-sync --configfile=/etc/shairport-sync.conf -o pulseaudio -vvv --logOutputLevel \
+	shairport-sync --configfile=/etc/shairport-sync.conf -o pulseaudio -v --logOutputLevel \
 		2>&1 | while read line; do bashio::log.info "SP: $line"; done
 else
-	exec shairport-sync --configfile=/etc/shairport-sync.conf -o pa
+	exec shairport-sync --configfile=/etc/shairport-sync.conf -o pulseaudio
 fi
-
